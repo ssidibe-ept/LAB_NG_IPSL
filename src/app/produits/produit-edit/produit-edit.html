@@ -1,0 +1,406 @@
+<div class="produit-edit-container">
+  <!-- Barre de navigation -->
+  <div class="navigation-bar">
+    <button (click)="cancelEdit()" class="btn-back">
+      <i class="bi bi-arrow-left"></i>
+      Retour
+    </button>
+
+    <div class="page-title">
+      <h1>
+        <i class="bi bi-pencil-square"></i>
+        Modifier le Produit
+      </h1>
+      <div class="product-id" *ngIf="productId">
+        ID: #{{ productId }}
+      </div>
+    </div>
+
+    <div class="form-status" *ngIf="hasChanges()">
+      <span class="unsaved-changes">
+        <i class="bi bi-circle-fill"></i>
+        Modifications non enregistrées
+      </span>
+    </div>
+  </div>
+
+  <!-- Alerte d'erreur -->
+  <div *ngIf="errorMessage" class="alert error">
+    <div class="alert-content">
+      <i class="bi bi-exclamation-octagon"></i>
+      <div>
+        <h3>Erreur</h3>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message de succès -->
+  <div *ngIf="successMessage" class="alert success">
+    <div class="alert-content">
+      <i class="bi bi-check-circle"></i>
+      <div>
+        <h3>Succès</h3>
+        <p>{{ successMessage }}</p>
+        <div class="redirect-message">
+          <i class="bi bi-hourglass-split"></i>
+          Redirection dans 2 secondes...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- État de chargement -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Chargement du produit...</p>
+    </div>
+  </div>
+
+  <!-- Formulaire d'édition -->
+  <div *ngIf="!isLoading && produit" class="edit-form-container">
+    <div class="form-grid">
+      <!-- Carte de formulaire -->
+      <div class="form-card">
+        <div class="card-header">
+          <h2>
+            <i class="bi bi-clipboard-data"></i>
+            Informations du Produit
+          </h2>
+          <p class="subtitle">Modifiez les informations ci-dessous</p>
+        </div>
+
+        <form [formGroup]="produitForm" (ngSubmit)="onSubmit()" class="product-form">
+          <!-- Champ Nom -->
+          <div class="form-group" [class]="getFieldClass('nom')">
+            <label for="nom" class="form-label">
+              <i class="bi bi-tag"></i>
+              Nom du produit
+              <span class="required">*</span>
+            </label>
+
+            <div class="input-wrapper">
+              <input
+                type="text"
+                id="nom"
+                formControlName="nom"
+                placeholder="Ex: Ordinateur Portable"
+                class="form-control"
+                [class.invalid]="isFieldInvalid('nom')"
+              >
+
+              <div class="input-icons">
+                <i class="bi bi-fonts"></i>
+              </div>
+            </div>
+
+            <!-- Messages d'erreur -->
+            <div class="error-messages" *ngIf="isFieldInvalid('nom')">
+              <div *ngIf="f['nom'].errors?.['required']" class="error-message">
+                <i class="bi bi-exclamation-circle"></i>
+                Le nom est obligatoire
+              </div>
+              <div *ngIf="f['nom'].errors?.['minlength']" class="error-message">
+                <i class="bi bi-exclamation-circle"></i>
+                Minimum 2 caractères
+              </div>
+              <div *ngIf="f['nom'].errors?.['maxlength']" class="error-message">
+                <i class="bi bi-exclamation-circle"></i>
+                Maximum 100 caractères
+              </div>
+            </div>
+
+            <!-- Indicateur de validité -->
+            <div class="valid-indicator" *ngIf="f['nom'].valid && f['nom'].dirty">
+              <i class="bi bi-check-circle"></i>
+              Nom valide
+            </div>
+          </div>
+
+          <!-- Champ Prix -->
+          <div class="form-group" [class]="getFieldClass('prix')">
+            <label for="prix" class="form-label">
+              <i class="bi bi-currency-euro"></i>
+              Prix unitaire (€)
+              <span class="required">*</span>
+            </label>
+
+            <div class="input-wrapper">
+              <input
+                type="number"
+                id="prix"
+                formControlName="prix"
+                placeholder="0.00"
+                step="0.01"
+                min="0.01"
+                class="form-control"
+                [class.invalid]="isFieldInvalid('prix')"
+              >
+
+              <div class="input-icons">
+                <i class="bi bi-cash"></i>
+                <span class="currency">€</span>
+              </div>
+            </div>
+
+            <!-- Messages d'erreur -->
+            <div class="error-messages" *ngIf="isFieldInvalid('prix')">
+              <div *ngIf="f['prix'].errors?.['required']" class="error-message">
+                <i class="bi bi-exclamation-circle"></i>
+                Le prix est obligatoire
+              </div>
+              <div *ngIf="f['prix'].errors?.['min']" class="error-message">
+                <i class="bi bi-exclamation-circle"></i>
+                Le prix doit être supérieur à 0
+              </div>
+              <div *ngIf="f['prix'].errors?.['max']" class="error-message">
+                <i class="bi bi-exclamation-circle"></i>
+                Prix maximum: 999 999,99 €
+              </div>
+            </div>
+
+            <!-- Indicateur de validité -->
+            <div class="valid-indicator" *ngIf="f['prix'].valid && f['prix'].dirty">
+              <i class="bi bi-check-circle"></i>
+              Prix valide
+            </div>
+          </div>
+
+          <!-- Champ Quantité -->
+          <div class="form-group" [class]="getFieldClass('quantite')">
+            <label for="quantite" class="form-label">
+              <i class="bi bi-box"></i>
+              Quantité en stock
+              <span class="required">*</span>
+            </label>
+
+            <div class="input-wrapper">
+              <input
+                type="number"
+                id="quantite"
+                formControlName="quantite"
+                placeholder="0"
+                min="0"
+                class="form-control"
+                [class.invalid]="isFieldInvalid('quantite')"
+              >
+
+              <div class="input-icons">
+                <i class="bi bi-box-seam"></i>
+                <span class="unit">unités</span>
+              </div>
+            </div>
+
+            <!-- Messages d'erreur -->
+            <div class="error-messages" *ngIf="isFieldInvalid('quantite')">
+              <div *ngIf="f['quantite'].errors?.['required']" class="error-message">
+                <i class="bi bi-exclamation-circle"></i>
+                La quantité est obligatoire
+              </div>
+              <div *ngIf="f['quantite'].errors?.['min']" class="error-message">
+                <i class="bi bi-exclamation-circle"></i>
+                La quantité ne peut pas être négative
+              </div>
+              <div *ngIf="f['quantite'].errors?.['max']" class="error-message">
+                <i class="bi bi-exclamation-circle"></i>
+                Quantité maximum: 999 999
+              </div>
+            </div>
+
+            <!-- Indicateur de validité -->
+            <div class="valid-indicator" *ngIf="f['quantite'].valid && f['quantite'].dirty">
+              <i class="bi bi-check-circle"></i>
+              Quantité valide
+            </div>
+          </div>
+
+          <!-- Boutons d'action -->
+          <div class="form-actions">
+            <button
+              type="button"
+              (click)="resetForm()"
+              class="btn btn-secondary"
+              [disabled]="!hasChanges() || isSubmitting"
+            >
+              <i class="bi bi-arrow-clockwise"></i>
+              Réinitialiser
+            </button>
+
+            <button
+              type="button"
+              (click)="cancelEdit()"
+              class="btn btn-outline"
+            >
+              <i class="bi bi-x-circle"></i>
+              Annuler
+            </button>
+
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="produitForm.invalid || isSubmitting || !hasChanges()"
+            >
+              <i class="bi bi-save" *ngIf="!isSubmitting"></i>
+              <i class="bi bi-hourglass-split" *ngIf="isSubmitting"></i>
+              {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer les modifications' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Carte de prévisualisation -->
+      <div class="preview-card">
+        <div class="card-header">
+          <h2>
+            <i class="bi bi-eye"></i>
+            Aperçu des modifications
+          </h2>
+          <p class="subtitle">Vérifiez vos changements</p>
+        </div>
+
+        <div class="preview-content">
+          <!-- Anciennes valeurs -->
+          <div class="preview-section old-values">
+            <h3>
+              <i class="bi bi-clock-history"></i>
+              Valeurs actuelles
+            </h3>
+
+            <div class="preview-item">
+              <div class="preview-label">Nom</div>
+              <div class="preview-value">{{ produit.nom }}</div>
+            </div>
+
+            <div class="preview-item">
+              <div class="preview-label">Prix</div>
+              <div class="preview-value">{{ produit.prix | number:'1.2-2' }} €</div>
+            </div>
+
+            <div class="preview-item">
+              <div class="preview-label">Quantité</div>
+              <div class="preview-value">{{ produit.quantite }} unité(s)</div>
+            </div>
+
+            <div class="preview-item">
+              <div class="preview-label">Valeur stock</div>
+              <div class="preview-value">
+                {{ produit.prix * produit.quantite | number:'1.2-2' }} €
+              </div>
+            </div>
+          </div>
+
+          <!-- Nouvelles valeurs -->
+          <div class="preview-section new-values">
+            <h3>
+              <i class="bi bi-arrow-right-circle"></i>
+              Nouvelles valeurs
+            </h3>
+
+            <div class="preview-item">
+              <div class="preview-label">Nom</div>
+              <div class="preview-value" [class.changed]="produitForm.get('nom')?.dirty">
+                {{ produitForm.get('nom')?.value || 'Non modifié' }}
+              </div>
+            </div>
+
+            <div class="preview-item">
+              <div class="preview-label">Prix</div>
+              <div class="preview-value" [class.changed]="produitForm.get('prix')?.dirty">
+                {{ (produitForm.get('prix')?.value || 0) | number:'1.2-2' }} €
+              </div>
+            </div>
+
+            <div class="preview-item">
+              <div class="preview-label">Quantité</div>
+              <div class="preview-value" [class.changed]="produitForm.get('quantite')?.dirty">
+                {{ produitForm.get('quantite')?.value || 0 }} unité(s)
+              </div>
+            </div>
+
+            <div class="preview-item">
+              <div class="preview-label">Valeur stock</div>
+              <div class="preview-value total-value">
+                {{ calculateTotalValue() | number:'1.2-2' }} €
+                <span class="change-indicator" *ngIf="hasChanges()">
+                  <i class="bi bi-arrow-up" *ngIf="calculateTotalValue() > (produit.prix * produit.quantite)"></i>
+                  <i class="bi bi-arrow-down" *ngIf="calculateTotalValue() < (produit.prix * produit.quantite)"></i>
+                  <i class="bi bi-dash" *ngIf="calculateTotalValue() === (produit.prix * produit.quantite)"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Résumé des changements -->
+          <div class="changes-summary" *ngIf="hasChanges()">
+            <h3>
+              <i class="bi bi-list-check"></i>
+              Résumé des modifications
+            </h3>
+
+            <div class="changes-list">
+              <div class="change-item" *ngIf="produitForm.get('nom')?.dirty">
+                <i class="bi bi-check-circle"></i>
+                <span>Nom modifié</span>
+              </div>
+
+              <div class="change-item" *ngIf="produitForm.get('prix')?.dirty">
+                <i class="bi bi-check-circle"></i>
+                <span>Prix modifié</span>
+              </div>
+
+              <div class="change-item" *ngIf="produitForm.get('quantite')?.dirty">
+                <i class="bi bi-check-circle"></i>
+                <span>Quantité modifiée</span>
+              </div>
+            </div>
+
+            <div class="value-change">
+              <div class="change-label">Variation valeur stock:</div>
+              <div class="change-value" [class.positive]="calculateTotalValue() > (produit.prix * produit.quantite)"
+                   [class.negative]="calculateTotalValue() < (produit.prix * produit.quantite)">
+                {{ calculateTotalValue() - (produit.prix * produit.quantite) | number:'+1.2-2' }} €
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aide -->
+  <div class="help-section">
+    <div class="help-card">
+      <div class="help-header">
+        <i class="bi bi-question-circle"></i>
+        <h3>Guide d'édition</h3>
+      </div>
+
+      <div class="help-content">
+        <div class="help-item">
+          <i class="bi bi-asterisk text-danger"></i>
+          <div>
+            <strong>Champs obligatoires</strong>
+            <p>Tous les champs marqués d'un astérisque (*) sont obligatoires</p>
+          </div>
+        </div>
+
+        <div class="help-item">
+          <i class="bi bi-check-circle text-success"></i>
+          <div>
+            <strong>Validation</strong>
+            <p>Les champs valides sont indiqués par une coche verte</p>
+          </div>
+        </div>
+
+        <div class="help-item">
+          <i class="bi bi-lightbulb text-warning"></i>
+          <div>
+            <strong>Conseil</strong>
+            <p>Vérifiez l'aperçu à droite pour visualiser vos modifications</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

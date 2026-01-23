@@ -1,0 +1,236 @@
+<div class="produit-detail-container">
+  <!-- Bouton retour -->
+  <div class="navigation-bar">
+    <button (click)="goBack()" class="btn-back">
+      <i class="bi bi-arrow-left"></i>
+      Retour à la liste
+    </button>
+
+    <div class="action-buttons">
+      <button (click)="editProduit()" class="btn-edit">
+        <i class="bi bi-pencil"></i>
+        Modifier
+      </button>
+      <button (click)="deleteProduit()" class="btn-delete">
+        <i class="bi bi-trash"></i>
+        Supprimer
+      </button>
+    </div>
+  </div>
+
+  <!-- Alerte d'erreur -->
+  <div *ngIf="errorMessage" class="error-card">
+    <div class="error-content">
+      <i class="bi bi-exclamation-octagon error-icon"></i>
+      <div>
+        <h3 class="error-title">Erreur</h3>
+        <p class="error-message">{{ errorMessage }}</p>
+        <button (click)="goBack()" class="btn-primary">
+          <i class="bi bi-arrow-left"></i>
+          Retour à la liste
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- État de chargement -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Chargement du produit...</p>
+  </div>
+
+  <!-- Carte de détail du produit -->
+  <div *ngIf="!isLoading && produit" class="produit-card">
+    <!-- En-tête de la carte -->
+    <div class="card-header">
+      <div class="header-content">
+        <div class="product-icon-large">
+          <i class="bi bi-box"></i>
+        </div>
+        <div>
+          <h1 class="product-title">{{ produit.nom }}</h1>
+          <div class="product-id">ID: #{{ produit.id }}</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="stock-badge" [style.background]="getStockColor(produit.quantite)">
+          <i [class]="getStockIcon(produit.quantite)"></i>
+          {{ getStockStatusText(produit.quantite) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="card-body">
+      <div class="product-grid">
+        <!-- Section informations de base -->
+        <div class="info-section">
+          <h3 class="section-title">
+            <i class="bi bi-info-circle"></i>
+            Informations Générales
+          </h3>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">
+                <i class="bi bi-tag"></i>
+                Nom du produit
+              </div>
+              <div class="info-value">{{ produit.nom }}</div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-label">
+                <i class="bi bi-hash"></i>
+                Identifiant
+              </div>
+              <div class="info-value">#{{ produit.id }}</div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-label">
+                <i class="bi bi-calendar"></i>
+                Date de création
+              </div>
+              <div class="info-value">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section prix et valeur -->
+        <div class="price-section">
+          <h3 class="section-title">
+            <i class="bi bi-cash-stack"></i>
+            Informations Financières
+          </h3>
+
+          <div class="price-grid">
+            <div class="price-item">
+              <div class="price-label">Prix unitaire</div>
+              <div class="price-value highlight">
+                {{ produit.prix | number:'1.2-2' }} €
+              </div>
+              <div class="price-description">HT par unité</div>
+            </div>
+
+            <div class="price-item">
+              <div class="price-label">Quantité en stock</div>
+              <div class="price-value stock-quantity">
+                {{ produit.quantite }} unité(s)
+              </div>
+              <div class="price-description">Disponible(s)</div>
+            </div>
+
+            <div class="price-item">
+              <div class="price-label">Valeur totale</div>
+              <div class="price-value total-value">
+                {{ getTotalValue() | number:'1.2-2' }} €
+              </div>
+              <div class="price-description">En stock</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section statut -->
+        <div class="status-section">
+          <h3 class="section-title">
+            <i class="bi bi-graph-up"></i>
+            Statut du Stock
+          </h3>
+
+          <div class="status-content">
+            <div class="status-indicator" [style.background]="getStockColor(produit.quantite)">
+              <div class="status-level" [style.height]="getStockLevel(produit.quantite)"></div>
+            </div>
+
+            <div class="status-info">
+              <div class="status-item">
+                <i [class]="getStockIcon(produit.quantite)"></i>
+                <div>
+                  <div class="status-label">Niveau de stock</div>
+                  <div class="status-value">{{ getStockStatusText(produit.quantite) }}</div>
+                </div>
+              </div>
+
+              <div class="status-item">
+                <i class="bi bi-box-seam"></i>
+                <div>
+                  <div class="status-label">Unités disponibles</div>
+                  <div class="status-value">{{ produit.quantite }}</div>
+                </div>
+              </div>
+
+              <div class="status-item">
+                <i class="bi bi-clock"></i>
+                <div>
+                  <div class="status-label">Dernière mise à jour</div>
+                  <div class="status-value">Aujourd'hui</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section statistiques -->
+        <div class="stats-section">
+          <h3 class="section-title">
+            <i class="bi bi-bar-chart"></i>
+            Statistiques
+          </h3>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="bi bi-percent"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">-</div>
+                <div class="stat-label">Marge estimée</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="bi bi-arrow-up-right"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">-</div>
+                <div class="stat-label">Demande mensuelle</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="bi bi-calendar-week"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value">{{ getStockDays(produit.quantite) }}</div>
+                <div class="stat-label">Jours de stock</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer de la carte -->
+    <div class="card-footer">
+      <div class="footer-content">
+        <div class="last-updated">
+          <i class="bi bi-clock-history"></i>
+          Dernière consultation: {{ getCurrentTime() }}
+        </div>
+        <div class="quick-actions">
+          <button (click)="editProduit()" class="btn-action">
+            <i class="bi bi-pencil-square"></i>
+            Modifier les informations
+          </button>
+          <button [routerLink]="['/produits']" class="btn-action secondary">
+            <i class="bi bi-list-ul"></i>
+            Voir tous les produits
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

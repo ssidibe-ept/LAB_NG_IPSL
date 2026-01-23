@@ -1,0 +1,196 @@
+<div class="container">
+  <!-- En-tête -->
+  <div class="page-header">
+    <div class="header-content">
+      <div>
+        <h1 class="title">
+          <i class="bi bi-box-seam"></i>Gestion des Produits
+        </h1>
+        <p class="text-light mb-0 opacity-75">Gérez votre inventaire efficacement</p>
+      </div>
+      <a routerLink="/produits/add" class="btn btn-add">
+        <i class="bi bi-plus-circle"></i> Nouveau Produit
+      </a>
+    </div>
+  </div>
+
+  <!-- Alerte d'erreur -->
+  <div *ngIf="errorMessage" class="error-alert d-flex align-items-start">
+    <i class="bi bi-exclamation-triangle error-icon"></i>
+    <div class="error-content">
+      <h6 class="error-title">Avertissement</h6>
+      <p class="error-message">{{ errorMessage }}</p>
+      <button (click)="refreshList()" class="btn-refresh">
+        <i class="bi bi-arrow-clockwise"></i> Réessayer
+      </button>
+    </div>
+  </div>
+
+  <!-- Carte principale -->
+  <div class="main-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="header-title">
+        <i class="bi bi-list-ul"></i> Inventaire des Produits
+      </h5>
+      <span class="product-count">
+        {{ produits.length }} produit(s)
+      </span>
+    </div>
+
+    <div class="card-body">
+      <!-- État de chargement -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner-border spinner" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="loading-text">Chargement de l'inventaire...</p>
+      </div>
+
+      <!-- État vide -->
+      <div *ngIf="!isLoading && produits.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-inbox"></i>
+        </div>
+        <h3 class="empty-title">Aucun produit disponible</h3>
+        <p class="empty-text">
+          Votre inventaire est vide. Commencez par ajouter votre premier produit.
+        </p>
+        <a routerLink="/produits/add" class="btn btn-primary btn-lg">
+          <i class="bi bi-plus-circle"></i> Ajouter un produit
+        </a>
+      </div>
+
+      <!-- Tableau des produits -->
+      <div *ngIf="!isLoading && produits.length > 0" class="table-responsive">
+        <table class="table products-table">
+          <thead>
+          <tr>
+            <th class="ps-4">PRODUIT</th>
+            <th class="text-end">PRIX</th>
+            <th class="text-center">STOCK</th>
+            <th class="text-center">STATUT</th>
+            <th class="text-end pe-4">ACTIONS</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let produit of produits; let i = index"
+              [attr.data-product-id]="produit.id"
+              [style.--row-index]="i">
+            <td class="product-info">
+              <div class="d-flex align-items-center">
+                <div class="product-icon me-3">
+                  <i class="bi bi-box"></i>
+                </div>
+                <div>
+                  <div class="product-name">{{ produit.nom }}</div>
+                  <div class="product-id">ID: #{{ produit.id }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="price-cell text-end">
+              {{ produit.prix | number:'1.2-2' }} €
+            </td>
+            <td class="stock-cell text-center">
+                <span class="badge stock-badge">
+                  {{ produit.quantite }} unité(s)
+                </span>
+            </td>
+            <td class="text-center">
+                <span class="badge stock-badge"
+                      [class]="getStockStatusClass(produit.quantite)">
+                  {{ getStockStatusText(produit.quantite) }}
+                </span>
+            </td>
+            <td class="text-end pe-4">
+              <div class="actions-group">
+                <a [routerLink]="['/produits', getProduitId(produit)]"
+                   class="btn-action btn-details">
+                  <i class="bi bi-eye"></i> Détails
+                </a>
+                <a [routerLink]="['/produits/edit', getProduitId(produit)]"
+                   class="btn-action btn-edit">
+                  <i class="bi bi-pencil"></i> Modifier
+                </a>
+                <button (click)="deleteProduit(getProduitId(produit))"
+                        class="btn-action btn-delete">
+                  <i class="bi bi-trash"></i> Supprimer
+                </button>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div *ngIf="!isLoading && produits.length > 0" class="card-footer bg-light">
+      <div class="d-flex justify-content-between align-items-center">
+        <small class="text-muted">
+          <i class="bi bi-info-circle me-1"></i>
+          Double-cliquez sur un produit pour plus d'options
+        </small>
+        <button (click)="refreshList()" class="btn-refresh btn-sm">
+          <i class="bi bi-arrow-clockwise"></i> Actualiser
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiques -->
+  <div *ngIf="!isLoading && produits.length > 0" class="stats-container">
+    <div class="stat-card">
+      <div class="stat-icon icon-value">
+        <i class="bi bi-currency-euro"></i>
+      </div>
+      <div class="stat-label">Valeur totale du stock</div>
+      <h3 class="stat-value value-total">
+        {{ totalValue | number:'1.2-2' }} €
+      </h3>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-average">
+        <i class="bi bi-graph-up"></i>
+      </div>
+      <div class="stat-label">Prix moyen</div>
+      <h3 class="stat-value value-average">
+        {{ averagePrice | number:'1.2-2' }} €
+      </h3>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-stock">
+        <i class="bi bi-boxes"></i>
+      </div>
+      <div class="stat-label">Stock total</div>
+      <h3 class="stat-value value-stock">
+        {{ totalStock }} unités
+      </h3>
+    </div>
+  </div>
+
+  <!-- Instructions -->
+  <div class="alert alert-info border-0 shadow-sm">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-lightbulb fs-4 me-3"></i>
+      <div>
+        <h6 class="alert-heading mb-2">Guide rapide</h6>
+        <div class="row">
+          <div class="col-md-4">
+            <i class="bi bi-eye text-info me-2"></i>
+            <strong>Détails</strong> : Voir toutes les informations
+          </div>
+          <div class="col-md-4">
+            <i class="bi bi-pencil text-warning me-2"></i>
+            <strong>Modifier</strong> : Mettre à jour le produit
+          </div>
+          <div class="col-md-4">
+            <i class="bi bi-trash text-danger me-2"></i>
+            <strong>Supprimer</strong> : Retirer définitivement
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

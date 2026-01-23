@@ -1,16 +1,21 @@
-import { delay, Observable, of } from "rxjs";
-import { PRODUITS } from "../data/produit.data";
-import { Produit } from "../models/produit.model";
+import { Injectable } from '@angular/core';
+import { Observable, of, delay } from 'rxjs';
+import { Produit } from '../models/produit.model';
+import { PRODUITS } from '../data/produit.data';
 
+@Injectable({
+  providedIn: 'root'
+})
 export class ProduitService {
   private produits: Produit[] = PRODUITS;
 
   getAll(): Observable<Produit[]> {
-    return of(this.produits).pipe(delay(500));
+    return of(this.produits).pipe(delay(500)); // Simulation délai réseau
   }
 
   getById(id: number): Observable<Produit | undefined> {
-    return of(this.produits.find(p => p.id === id)).pipe(delay(500));
+    const produit = this.produits.find(p => p.id === id);
+    return of(produit).pipe(delay(500));
   }
 
   add(produit: Produit): Observable<Produit> {
@@ -21,7 +26,9 @@ export class ProduitService {
 
   update(produit: Produit): Observable<Produit> {
     const index = this.produits.findIndex(p => p.id === produit.id);
-    this.produits[index] = produit;
+    if (index !== -1) {
+      this.produits[index] = produit;
+    }
     return of(produit).pipe(delay(500));
   }
 

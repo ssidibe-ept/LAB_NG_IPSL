@@ -1,0 +1,358 @@
+<div class="produit-add-container">
+  <!-- Barre de navigation -->
+  <div class="navigation-bar">
+    <button (click)="cancel()" class="btn-back">
+      <i class="bi bi-arrow-left"></i>
+      Annuler
+    </button>
+
+    <div class="page-title">
+      <h1>
+        <i class="bi bi-plus-circle"></i>
+        Nouveau Produit
+      </h1>
+      <div class="page-subtitle">
+        Ajoutez un nouveau produit à votre inventaire
+      </div>
+    </div>
+
+    <div class="form-status" *ngIf="hasChanges()">
+      <span class="unsaved-changes">
+        <i class="bi bi-pencil-fill"></i>
+        Modifications en cours
+      </span>
+    </div>
+  </div>
+
+  <!-- Alertes -->
+  <div *ngIf="errorMessage" class="alert error">
+    <div class="alert-content">
+      <i class="bi bi-exclamation-octagon"></i>
+      <div>
+        <h3>Erreur</h3>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="successMessage" class="alert success">
+    <div class="alert-content">
+      <i class="bi bi-check-circle"></i>
+      <div>
+        <h3>Succès</h3>
+        <p>{{ successMessage }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="main-content">
+    <div class="content-grid">
+      <!-- Formulaire -->
+      <div class="form-section">
+        <div class="form-card">
+          <div class="card-header">
+            <h2>
+              <i class="bi bi-clipboard-plus"></i>
+              Informations du produit
+            </h2>
+            <p class="subtitle">Remplissez tous les champs obligatoires</p>
+          </div>
+
+          <form [formGroup]="produitForm" (ngSubmit)="onSubmit()" class="product-form" novalidate>
+            <!-- Champ Nom -->
+            <div class="form-group" [class]="getFieldClass('nom')">
+              <label for="nom" class="form-label">
+                <i class="bi bi-tag"></i>
+                Nom du produit
+                <span class="required">*</span>
+              </label>
+
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="nom"
+                  formControlName="nom"
+                  placeholder="Ex: Ordinateur Portable"
+                  class="form-control"
+                  [class.invalid]="isFieldInvalid('nom')"
+                  autocomplete="off"
+                />
+
+                <div class="input-icons">
+                  <i class="bi bi-fonts"></i>
+                </div>
+              </div>
+
+              <!-- Indicateurs de validation -->
+              <div class="field-indicators">
+                <div class="error-messages" *ngIf="isFieldInvalid('nom')">
+                  <div *ngFor="let error of getFieldErrors('nom')" class="error-message">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ error }}
+                  </div>
+                </div>
+
+                <div class="valid-indicator" *ngIf="f['nom'].valid && f['nom'].dirty">
+                  <i class="bi bi-check-circle"></i>
+                  Nom valide et unique
+                </div>
+              </div>
+
+              <!-- Aide -->
+              <div class="field-help">
+                <i class="bi bi-info-circle"></i>
+                Choisissez un nom descriptif et unique
+              </div>
+            </div>
+
+            <!-- Champ Prix -->
+            <div class="form-group" [class]="getFieldClass('prix')">
+              <label for="prix" class="form-label">
+                <i class="bi bi-currency-euro"></i>
+                Prix unitaire (€)
+                <span class="required">*</span>
+              </label>
+
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="prix"
+                  formControlName="prix"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0.01"
+                  class="form-control"
+                  [class.invalid]="isFieldInvalid('prix')"
+                />
+
+                <div class="input-icons">
+                  <i class="bi bi-cash"></i>
+                  <span class="currency">€</span>
+                </div>
+              </div>
+
+              <!-- Indicateurs de validation -->
+              <div class="field-indicators">
+                <div class="error-messages" *ngIf="isFieldInvalid('prix')">
+                  <div *ngFor="let error of getFieldErrors('prix')" class="error-message">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ error }}
+                  </div>
+                </div>
+
+                <div class="valid-indicator" *ngIf="f['prix'].valid && f['prix'].dirty">
+                  <i class="bi bi-check-circle"></i>
+                  Prix valide
+                </div>
+              </div>
+
+              <!-- Aide -->
+              <div class="field-help">
+                <i class="bi bi-info-circle"></i>
+                Prix HT par unité (supérieur à 0)
+              </div>
+            </div>
+
+            <!-- Champ Quantité -->
+            <div class="form-group" [class]="getFieldClass('quantite')">
+              <label for="quantite" class="form-label">
+                <i class="bi bi-box"></i>
+                Quantité initiale
+                <span class="required">*</span>
+              </label>
+
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="quantite"
+                  formControlName="quantite"
+                  placeholder="0"
+                  min="0"
+                  class="form-control"
+                  [class.invalid]="isFieldInvalid('quantite')"
+                />
+
+                <div class="input-icons">
+                  <i class="bi bi-box-seam"></i>
+                  <span class="unit">unités</span>
+                </div>
+              </div>
+
+              <!-- Indicateurs de validation -->
+              <div class="field-indicators">
+                <div class="error-messages" *ngIf="isFieldInvalid('quantite')">
+                  <div *ngFor="let error of getFieldErrors('quantite')" class="error-message">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ error }}
+                  </div>
+                </div>
+
+                <div class="valid-indicator" *ngIf="f['quantite'].valid && f['quantite'].dirty">
+                  <i class="bi bi-check-circle"></i>
+                  Quantité valide
+                </div>
+              </div>
+
+              <!-- Aide -->
+              <div class="field-help">
+                <i class="bi bi-info-circle"></i>
+                Quantité disponible en stock (0 ou plus)
+              </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="form-actions">
+              <button
+                type="button"
+                (click)="resetForm()"
+                class="btn btn-secondary"
+                [disabled]="!hasChanges() || isSubmitting"
+              >
+                <i class="bi bi-arrow-clockwise"></i>
+                Réinitialiser
+              </button>
+
+              <button
+                type="button"
+                (click)="cancel()"
+                class="btn btn-outline"
+              >
+                <i class="bi bi-x-circle"></i>
+                Annuler
+              </button>
+
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="produitForm.invalid || isSubmitting"
+              >
+                <i class="bi bi-save" *ngIf="!isSubmitting"></i>
+                <i class="bi bi-hourglass-split" *ngIf="isSubmitting"></i>
+                {{ isSubmitting ? 'Création en cours...' : 'Créer le produit' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Prévisualisation -->
+      <div class="preview-section">
+        <div class="preview-card">
+          <div class="card-header">
+            <h2>
+              <i class="bi bi-eye"></i>
+              Aperçu du produit
+            </h2>
+            <p class="subtitle">Visualisez votre produit</p>
+          </div>
+
+          <div class="preview-content">
+            <!-- Carte de produit -->
+            <div class="product-preview-card">
+              <div class="product-header">
+                <div class="product-icon">
+                  <i class="bi bi-box"></i>
+                </div>
+                <div class="product-title">
+                  <h3>{{ produitForm.get('nom')?.value || 'Nouveau produit' }}</h3>
+                  <div class="product-id">ID: #{{ 'Nouveau' }}</div>
+                </div>
+              </div>
+
+              <div class="product-details">
+                <div class="detail-item">
+                  <span class="detail-label">Prix unitaire</span>
+                  <span class="detail-value">
+                    {{ (produitForm.get('prix')?.value || 0) | number:'1.2-2' }} €
+                  </span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Quantité</span>
+                  <span class="detail-value">
+                    {{ produitForm.get('quantite')?.value || 0 }} unité(s)
+                  </span>
+                </div>
+
+                <div class="detail-item total">
+                  <span class="detail-label">Valeur totale</span>
+                  <span class="detail-value highlight">
+                    {{ calculateTotalValue() | number:'1.2-2' }} €
+                  </span>
+                </div>
+
+            </div>
+
+            <!-- Résumé -->
+            <div class="summary-section">
+              <h3>
+                <i class="bi bi-list-check"></i>
+                Résumé
+              </h3>
+
+              <div class="summary-list">
+                <div class="summary-item">
+                  <i class="bi bi-check-circle" *ngIf="produitForm.get('nom')?.valid"></i>
+                  <i class="bi bi-circle" *ngIf="!produitForm.get('nom')?.valid"></i>
+                  <span>Nom du produit</span>
+                </div>
+
+                <div class="summary-item">
+                  <i class="bi bi-check-circle" *ngIf="produitForm.get('prix')?.valid"></i>
+                  <i class="bi bi-circle" *ngIf="!produitForm.get('prix')?.valid"></i>
+                  <span>Prix unitaire</span>
+                </div>
+
+                <div class="summary-item">
+                  <i class="bi bi-check-circle" *ngIf="produitForm.get('quantite')?.valid"></i>
+                  <i class="bi bi-circle" *ngIf="!produitForm.get('quantite')?.valid"></i>
+                  <span>Quantité initiale</span>
+                </div>
+              </div>
+
+              <div class="summary-total">
+                <div class="total-label">Valeur initiale du stock</div>
+                <div class="total-value">{{ calculateTotalValue() | number:'1.2-2' }} €</div>
+              </div>
+            </div>
+
+            <!-- Conseils -->
+            <div class="tips-section">
+              <h3>
+                <i class="bi bi-lightbulb"></i>
+                Conseils
+              </h3>
+
+              <div class="tips-list">
+                <div class="tip-item">
+                  <i class="bi bi-check2-circle"></i>
+                  <div>
+                    <strong>Nom unique</strong>
+                    <p>Assurez-vous que le nom n'existe pas déjà</p>
+                  </div>
+                </div>
+
+                <div class="tip-item">
+                  <i class="bi bi-check2-circle"></i>
+                  <div>
+                    <strong>Prix réaliste</strong>
+                    <p>Définissez un prix cohérent avec le marché</p>
+                  </div>
+                </div>
+
+                <div class="tip-item">
+                  <i class="bi bi-check2-circle"></i>
+                  <div>
+                    <strong>Quantité précise</strong>
+                    <p>Entrez la quantité exacte disponible</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
